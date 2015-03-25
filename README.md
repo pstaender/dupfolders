@@ -5,16 +5,18 @@ The script checks for duplicate folder sizes. This includes checking also their 
 
 For now it's running exclusively on UNIX systems (tested on Ubtuntu and Mac OS X so far) since it's using the `du` and `find` commands.
 
+** Dupfolders does not modify
+
 ### Usage / Syntax
 
 ```sh
-  $ ./dupfolders.rb [ options ] path
+  $ dupfolders.rb [ options ] path
 ```
 
-So a good way to start to measure a larger folder could be:
+A good way to start measuring a folder could be:
 
 ```sh
-  $ ./dupfolders.rb --excludeFolders=.git --displayParentFolderSize=true ~/Desktop > du
+  $ dupfolders.rb --excludeFolders=.git --displayParentFolderSize=true ~/Desktop > duplicates.log
 ```
 
 ### Options
@@ -26,6 +28,14 @@ So a good way to start to measure a larger folder could be:
   * `--displayFolderSizes`: true|false (display folder sizes in kbyte in the summary, default is `true`)
   * `--sortBySize`: desc|asc (sort found folders by their size, default is `desc`)
   * `--displayParentFolderSize`: true|false (display parent folder sizes to duplicate folders, default is `false`)
+
+### Exclude specific files, e.g. .DS_Store
+
+Although folders can be excluded (see option `--excludeFolders` above), files cannot.
+
+Most os store meta informations in hidden files: `.DS_Store` on Mac OS, `Desktop.ini` on Windows for instance. Unfortunately there is now option to exclude specific files, because they are included in measuring the folder sizes.
+
+A "workaround" would simply to delete those files (or move them somewhere else and replace with a symbolic link) to get a adequate folder comparing.
 
 ### TODO
 

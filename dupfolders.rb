@@ -11,6 +11,7 @@ options = {
   "displayFolderSizes" => "true",
   "sortBySize" => "desc",
   "displayParentFolderSize" => "false",
+  "displayIntermediateResults" => "false",
 }
 
 class String
@@ -43,6 +44,7 @@ options.merge!(args)
 options['progress'] = options['progress'].to_b
 options['displayFolderSizes'] = options['displayFolderSizes'].to_b
 options['displayParentFolderSize'] = options['displayParentFolderSize'].to_b
+options['displayIntermediateResults'] = options['displayIntermediateResults'].to_b
 options['minFolderSize'] = options['minFolderSize'].to_i
 options['minFilesCount'] = options['minFilesCount'].to_i
 options['excludeFolders'] = options['excludeFolders'].split(',')
@@ -118,12 +120,21 @@ folderWithSameSize.each do |size, folders|
     folderHash = ""
     files = `find '#{folder}' -type f`.strip!
     if files then files.split("\n").each do |file|
-        sha1 = Digest::SHA2.file(file).hexdigest
-        folderHash += sha1
+        begin
+          sha1 = Digest::SHA2.file(file).hexdigest
+          folderHash += sha1
+        rescue Exception => e
+          $stderr.puts "Error on hashing file '#{file}': #{e.message}"
+        end
       end
     end
     # folder hash is content hash + size
-    folderHash = Digest::SHA2.hexdigest(folderHash+size.to_s)
+    begin
+      folderHash = Digest::SHA2.hexdigest(folderHash+size.to_s)
+    rescue Exception => e
+      $stderr.puts "Error on building folder hash: #{e.message}"
+    end
+
     hashes[folderHash] = [] if hashes[folderHash].nil?
     hashes[folderHash].push(folder)
     if hashes[folderHash].length > 1
@@ -133,6 +144,7 @@ folderWithSameSize.each do |size, folders|
       duplicateFoldersCount += hashes[folderHash].length - duplicateFolders[size][folderHash].length
       duplicateFolders[size][folderHash] = hashes[folderHash]
       updateProgress((100/folderWithSameSizeCount)*n, "found #{duplicateFoldersCount} identical folder(s)") if options["progress"]
+      puts("(#{size} kbyte)\n#{hashes[folderHash].join("\n")}\n") if options['displayIntermediateResults']
     end
   end
   updateProgress((100/folderWithSameSizeCount)*n, "found #{duplicateFoldersCount} duplicate folder(s)") if options["progress"]
@@ -144,7 +156,10 @@ duplicateFoldersCount = 0
 sizesSum = 0
 parentFolderSizes = Hash.new
 
+puts ""
+
 if duplicateFolders.length > 0
+  puts "### Summary ###" if options['displayIntermediateResults']
   duplicateFolders = Hash[duplicateFolders.sort_by{|k,v| k}] if options["sortBySize"]
   duplicateFolders = Hash[duplicateFolders.to_a.reverse] if options["sortBySize"] and options["sortBySize"].downcase == 'desc'
   duplicateFolders.each do |size, hashes|

@@ -13,7 +13,7 @@ For now it's running exclusively on UNIX systems (tested on Ubtuntu and Mac OS X
   $ dupfolders.rb [ options ] path
 ```
 
-A good way to start measuring a folder could be:
+One way to check a path for duplicate folders could be:
 
 ```sh
   $ dupfolders.rb --excludeFolders=.git --displayParentFolderSize=true ~/Desktop > duplicates.log
@@ -26,6 +26,7 @@ A good way to start measuring a folder could be:
   * `--minFilesCount`: int.value (ignore folders with less than this files count, default is `1`)
   * `--excludeFolders`: comma seperated string (exclude folders with this name from comparing, e.g. `.git,.temp`)
   * `--displayFolderSizes`: true|false (display folder sizes in kbyte in the summary, default is `true`)
+  * `--displayIntermediateResults`: true|false (display instantly results instead of showing the summary only; helpful on large scans to avoid waiting until the process is finished, default is `false`)
   * `--sortBySize`: desc|asc (sort found folders by their size, default is `desc`)
   * `--displayParentFolderSize`: true|false (display parent folder sizes to duplicate folders, default is `false`)
 

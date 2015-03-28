@@ -49,7 +49,7 @@ options['minFolderSize'] = options['minFolderSize'].to_i
 options['minFilesCount'] = options['minFilesCount'].to_i
 options['excludeFolders'] = options['excludeFolders'].split(',')
 
-root = ARGV[ARGV.length-1]
+root = ARGV[ARGV.length-1].gsub(/\/+$/,'')
 
 unless Dir.exists?(root)
   $stderr.puts "Directory '#{root}' doesn't exists"
@@ -90,7 +90,6 @@ if folderSize
       size = parts[0][0].to_i
       path = parts[0][1]
       filesInFolder = `find '#{path}' -maxdepth 1 -type f`.strip!
-      #key = Digest::SHA2.hexdigest(size.to_s)
       if size >= options['minFolderSize'] and filesInFolder and filesInFolder.split("\n").length >= options["minFilesCount"]
         folderSizes[size] = [] if folderSizes[size].nil?
         folderSizes[size].push(path)
@@ -123,17 +122,16 @@ folderWithSameSize.each do |size, folders|
         begin
           sha1 = Digest::SHA2.file(file).hexdigest
           folderHash += sha1
+        rescue SystemExit, Interrupt
+          $stderr.puts "Aborting"
+          exit(1)
         rescue Exception => e
           $stderr.puts "Error on hashing file '#{file}': #{e.message}"
         end
       end
     end
     # folder hash is content hash + size
-    begin
-      folderHash = Digest::SHA2.hexdigest(folderHash+size.to_s)
-    rescue Exception => e
-      $stderr.puts "Error on building folder hash: #{e.message}"
-    end
+    folderHash = Digest::SHA2.hexdigest(folderHash+size.to_s)
 
     hashes[folderHash] = [] if hashes[folderHash].nil?
     hashes[folderHash].push(folder)

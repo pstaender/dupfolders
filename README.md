@@ -5,7 +5,7 @@ The script checks for duplicate folder sizes. This includes checking also their 
 
 For now it's running exclusively on UNIX systems (tested on Ubtuntu and Mac OS X so far) since it's using the `du` and `find` commands.
 
-** Dupfolders does not modify
+** Dupfolders does not modify your filesystem **
 
 ### Usage / Syntax
 
